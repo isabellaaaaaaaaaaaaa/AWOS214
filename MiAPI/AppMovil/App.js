@@ -40,7 +40,20 @@ export default function App() {
       </View>
   
   );
+
+  async function conectarConPython() {
+    try {
+        const respuesta = await fetch('http://localhost:5000/docs');
+        const datos = await respuesta.json();
+        
+        console.log(datos.mensaje); // Imprime: "Hola desde Python!"
+    } catch (error) {
+        console.error("No se pudo conectar:", error);
+    }
 }
+
+}
+
 
 // Estilos
 const styles = StyleSheet.create({
