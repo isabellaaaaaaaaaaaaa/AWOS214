@@ -1,10 +1,43 @@
-services: 
+version: "3.9"
+
+services:
+
   api:
     build: .
-    container_name: server_fastapi 
-    ports: 
+    container_name: ServerFastAPI
+    ports:
       - "5000:5000"
     volumes:
-      - ./app:/app/app 
-      
-  
+      - .:/app
+      #priemro se crea la api y luego la bd, es importante el orden, el depends on le da prioridad a la api
+    depends_on:
+      postgres:
+      #solo concestate si el servidor de postgre esta "saludable"
+        condition: service_healthy
+      #Conectate a admin y la bd de miapi
+    environment:
+      DATABASE_URL: postgresql://admin:123456@postgres:5434/DB_miapi
+
+  postgres:
+    image: postgres:15
+    container_name: ServerPostgreSql
+    restart: always
+    #credenciales, es la q pasamos antes
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: DB_miapi
+    ports:
+    #Lado externo e interno
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d DB_miapi"]
+      interval: 5s
+      retries: 5
+      timeout: 5s
+
+volumes:
+  postgres_data:
